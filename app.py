@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import connect_db
+from models import connect_db, User, db
+from forms import UserForm
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedbackdb"
@@ -15,7 +16,21 @@ toolbar = DebugToolbarExtension(app)
 
 @app.route('/')
 def root():
-    return redirect('register.html')
+    return redirect('/register')
 
-# @app.route('/register')
-# def create_user():
+@app.route('/register')
+def create_user():
+
+    form = UserForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        email = form.email.data
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        new_user = User.register(username, password, email, first_name, last_name)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+    return render_template('register.html', form=form)
