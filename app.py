@@ -29,9 +29,9 @@ def create_user():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        # new_user = User.register(username, password, email, first_name, last_name)
-        # db.session.add(new_user)
-        # db.session.commit()
+        user = User.register(username, password, first_name, last_name, email)
+        # db.session.add(user)
+        db.session.commit()
         return redirect('/secret')
 
     return render_template('register.html', form=form)
@@ -47,5 +47,17 @@ def login_user():
         if user:
             session['user_id'] = user.id
             return redirect('/secret')
+        else:
+            form.username.errors = ['Invalid username/password.']
+            return render_template('login.html', form=form)
 
     return render_template('login.html', form=form)
+
+@app.route('/secret')
+def show_secret():
+    return render_template('secret.html')
+
+@app.route('/logout')
+def logout_user():
+    session.pop('user_id')
+    return redirect('/')
